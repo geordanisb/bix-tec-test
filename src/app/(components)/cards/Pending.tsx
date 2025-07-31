@@ -8,25 +8,19 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 export default function Pending() {
-    const [transactionsResponse] = useAtom(getTransactions);
+    const [sumaryResponse] = useAtom(getTransactions);
     const[isLoading]=useAtom(isLoadingStore)
 
     let [data, setdata] = useState({ pendingQty: 0, revenuesPendingQty: 0, expensesPendingQty: 0 });
     useEffect(() => {
-        if (transactionsResponse.state == 'hasData' && transactionsResponse.data) {
-            data.revenuesPendingQty=0;
-            data.expensesPendingQty=0;
+        if (sumaryResponse.state == 'hasData' && sumaryResponse.data) {
+            data.revenuesPendingQty=sumaryResponse.data.revenues.pending;
+            data.expensesPendingQty=sumaryResponse.data.expenses.pending;
             data.pendingQty=0;
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if (t.pending) {
-                    data.revenuesPendingQty += t.transaction_type == REVENUES_VALUE ? 1 : 0;
-                    data.expensesPendingQty += t.transaction_type == REVENUES_VALUE ? 0 : 1;
-                    data.pendingQty++;
-                }
-            });
+            
             setdata(p => ({...data}))
         }
-    }, [transactionsResponse])
+    }, [sumaryResponse])
 
     return <Card sx={{
         width: '100%',

@@ -9,26 +9,26 @@ import { CallMade } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 
 export default function Expenses() {
-    const [transactionsResponse] = useAtom(getTransactions);
+    const [sumaryResponse] = useAtom(getTransactions);
     let [data,setdata] = useState({totalAmount:0,expensesQty:0});
     const [isLoading]=useAtom(isLoadingStore)
 
     useEffect(()=>{
-        if(transactionsResponse.state=='hasData'&&transactionsResponse.data){
-            data={totalAmount:0,expensesQty:0};
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if(t.transaction_type==EXPENSES_VALUE && !t.pending){
-                    data.totalAmount += amountFromString(t.amount);
-                    data.expensesQty++;
-                }
-            });
-            if(!transactionsResponse.data.length){
-                data.expensesQty=0;
-                data.totalAmount=0;
-            }
+        if(sumaryResponse.state=='hasData'&&sumaryResponse.data){
+            data={totalAmount:sumaryResponse.data.expenses.amount,expensesQty:sumaryResponse.data.expenses.qty};
+            // sumaryResponse.data?.forEach((t: Transaction) => {
+            //     if(t.transaction_type==EXPENSES_VALUE && !t.pending){
+            //         data.totalAmount += amountFromString(t.amount);
+            //         data.expensesQty++;
+            //     }
+            // });
+            // if(!sumaryResponse.data.length){
+            //     data.expensesQty=0;
+            //     data.totalAmount=0;
+            // }
             setdata(p=>({...data}));
         }
-    },[transactionsResponse])
+    },[sumaryResponse])
 
     return <Card sx={{
         width: '350px',

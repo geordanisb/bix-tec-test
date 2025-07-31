@@ -4,16 +4,16 @@ import { useAtom } from "jotai";
 import { FiltersInitialState, filtersStore, getTransactions, isLoadingStore } from "@/appStore";
 import { EXPENSES_VALUE } from "@/constants";
 import { amountFromString, formatAmountFromNumber } from "@/utils";
-import { AccountBalance, AttachMoney, CallMade, CallReceived, LocalAtm, Numbers, RestartAlt, SouthAmerica } from "@mui/icons-material";
+import { AttachMoney, CallMade, CallReceived, LocalAtm, Numbers, RestartAlt, SouthAmerica } from "@mui/icons-material";
 import { Transaction } from "@/generated/prisma";
 import { useEffect, useState } from "react";
 
 export default function States() {
-  const [transactionsResponse] = useAtom(getTransactions);
-  const [,setfilters] = useAtom(filtersStore);
-  const[isLoading]=useAtom(isLoadingStore)
+  const [sumaryResponse] = useAtom(getTransactions);
+  const [, setfilters] = useAtom(filtersStore);
+  const [isLoading] = useAtom(isLoadingStore)
 
-  let [states,setstates]=useState<Record<string, {
+  let [states, setstates] = useState<Record<string, {
     info: Record<string, {//a key for every currency
       revenuesQty: number;
       expensesQty: number;
@@ -23,114 +23,77 @@ export default function States() {
   }>>({});
 
   const resetFilters = () => {
-      const inLocalStorage = localStorage.getItem('filters');
-      const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
-      setfilters(filters);
+    const inLocalStorage = localStorage.getItem('filters');
+    const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
+    setfilters(filters);
   }
 
-  useEffect(()=>{
-    if(transactionsResponse.state=='hasData'&&transactionsResponse.data){
-      states={};
-      transactionsResponse.data.forEach((t:Transaction) => {
-        if (!t.pending) {
-          if (t.state in states) {
-            const info = states[t.state].info;
-            if (t.currency in info) {
-              info[t.currency].expensesQty += t.transaction_type == EXPENSES_VALUE ? 1 : 0;
-              info[t.currency].revenuesQty += t.transaction_type == EXPENSES_VALUE ? 0 : 1;
-              info[t.currency].expensesTotal += t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0;
-              info[t.currency].revenuesTotal += t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount);
-            }
-            else {
-              info[t.currency] = {
-                expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
-                revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
-                expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
-                revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
-              }
-            }
-          }
-          else {
-            states[t.state] = {
-              info: {
-                [t.currency]: {
-                  expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
-                  revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
-                  expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
-                  revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
-                }
-              }
-            }
-          }
-        }
-      });
-      if(!transactionsResponse.data.length)
-        setstates(p=>({}))
-      else
-        setstates(p=>({...states}));
+  useEffect(() => {
+    if (sumaryResponse.state == 'hasData' && sumaryResponse.data) {
+      states = sumaryResponse.data.states;
+      setstates(p => ({ ...states }));
     }
-  },[transactionsResponse])
+  }, [sumaryResponse])
 
-  function onStateSelected(state:string){
-    setfilters({state});
+  function onStateSelected(state: string) {
+    setfilters({ state });
   }
 
-  return <Card sx={{maxWidth:'370px'}}>
+  return <Card sx={{ maxWidth: '370px' }}>
     <CardHeader
       title='States'
       subheader={<Typography color="info">with transactions in the period</Typography>}
       action={<IconButton onClick={resetFilters}><RestartAlt /></IconButton>}
     />
-    <CardContent sx={{height:'40dvh',overflow:'scroll' }}>
+    <CardContent sx={{ height: '40dvh', overflow: 'scroll' }}>
       {
-        isLoading ? <CircularProgress/>
-        : <TableContainer>
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell><Avatar><SouthAmerica color="info" /></Avatar></TableCell>
-              <TableCell><Avatar><CallReceived color='success' /></Avatar></TableCell>
-              <TableCell><Avatar><CallMade color='warning' /></Avatar></TableCell>
-              <TableCell><Avatar><LocalAtm color="info"/></Avatar></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {
-              Object.entries(states).map(([state, value], idx) => {
-                return Object.entries(value.info).map(([currency, info]) => {
-                  return <TableRow sx={{cursor:'pointer'}} onClick={()=>onStateSelected(state)} key={state + currency}>
-                    <TableCell>{state}</TableCell>
-                    <TableCell>
-                      <Stack direction={'row'}>
-                        <CallReceived color="success"/>
-                        <Typography color="success">{info.revenuesQty}</Typography>
-                      </Stack>
-                      <Stack direction={'row'}>
-                        <AttachMoney color="success"/>
-                        <Typography color="success">{formatAmountFromNumber(info.revenuesTotal)}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction={'row'}>
-                        <CallMade color="warning"/>
-                        <Typography color="warning">{info.expensesQty}</Typography>
-                      </Stack>
-                      <Stack direction={'row'}>
-                        <AttachMoney color="warning"/>
-                        <Typography color="warning">{formatAmountFromNumber(info.expensesTotal)}</Typography>
-                      </Stack>
-                    </TableCell>
-                    <TableCell><Typography color="info">{currency.toUpperCase()}</Typography></TableCell>
-                  </TableRow>
-                })
-              })
+        isLoading ? <CircularProgress />
+          : <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell><Avatar><SouthAmerica color="info" /></Avatar></TableCell>
+                  <TableCell><Avatar><CallReceived color='success' /></Avatar></TableCell>
+                  <TableCell><Avatar><CallMade color='warning' /></Avatar></TableCell>
+                  <TableCell><Avatar><LocalAtm color="info" /></Avatar></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {
+                  Object.entries(states).map(([state, value], idx) => {
+                    return Object.entries(value.info).map(([currency, info]) => {
+                      return <TableRow sx={{ cursor: 'pointer' }} onClick={() => onStateSelected(state)} key={state + currency}>
+                        <TableCell>{state}</TableCell>
+                        <TableCell>
+                          <Stack direction={'row'}>
+                            <CallReceived color="success" />
+                            <Typography color="success">{info.revenuesQty}</Typography>
+                          </Stack>
+                          <Stack direction={'row'}>
+                            <AttachMoney color="success" />
+                            <Typography color="success">{formatAmountFromNumber(info.revenuesTotal,currency)}</Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction={'row'}>
+                            <CallMade color="warning" />
+                            <Typography color="warning">{info.expensesQty}</Typography>
+                          </Stack>
+                          <Stack direction={'row'}>
+                            <AttachMoney color="warning" />
+                            <Typography color="warning">{formatAmountFromNumber(info.expensesTotal,currency)}</Typography>
+                          </Stack>
+                        </TableCell>
+                        <TableCell><Typography color="info">{currency.toUpperCase()}</Typography></TableCell>
+                      </TableRow>
+                    })
+                  })
 
-            }
-          </TableBody>
-        </Table>
-      </TableContainer>
+                }
+              </TableBody>
+            </Table>
+          </TableContainer>
       }
-      
     </CardContent>
   </Card>
 }

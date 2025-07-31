@@ -7,20 +7,20 @@ import { useEffect, useState } from "react";
 interface Props extends BaseSelectProps { }
 export default function StateFilter({ ...others }: Props) {
     const [year, setyear] = useAtom(stateFiltersStore);
-    const [transactionsResponse]=useAtom(getTransactions);
+    const [sumaryResponse]=useAtom(getTransactions);
     let [states,setstates]=useState<Set<string>>(new Set());
 
     useEffect(()=>{
-        if(transactionsResponse.state=='hasData' && transactionsResponse.data){
-            states=new Set();
-            transactionsResponse.data.forEach(
-                (s)=>{
-                    states.add(s.state)
-                }
-            );
-            setstates(p=>states);
+        if(sumaryResponse.state=='hasData' && sumaryResponse.data){
+            // states=new Set();
+            // Object.keys(sumaryResponse.data.states).forEach(
+            //     (s)=>{
+            //         states.add(s)
+            //     }
+            // );
+            setstates(p=>new Set(Object.keys(sumaryResponse.data.states)));
         }
-    },[transactionsResponse])
+    },[sumaryResponse])
     
     const handleChange = (e: any) => {
         setyear(e.target.value);

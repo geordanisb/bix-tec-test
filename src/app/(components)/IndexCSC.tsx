@@ -55,7 +55,7 @@ export default function IndexCSC() {
 
         <Stack gap={2} paddingTop={2}>
           <TotalGrowth />
-          <PendingTransactions />
+          <PendingTransactions /> 
         </Stack>
        
       </Box>
@@ -63,7 +63,7 @@ export default function IndexCSC() {
         <Stack gap={2}>
           <Pending/>
           <Companies/>
-          <States/>
+          <States/> 
         </Stack>
       </Box>
     </Stack>

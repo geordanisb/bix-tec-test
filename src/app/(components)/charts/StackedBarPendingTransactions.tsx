@@ -9,28 +9,29 @@ import { useAtom } from 'jotai';
 import { useEffect } from 'react';
 
 export default function StackedBarPendingTransactions() {
-    const [transactionsResponse] = useAtom(getTransactions);
+    const [sumaryResponse] = useAtom(getTransactions);
     const[isLoading]=useAtom(isLoadingStore);
 
     useEffect(() => {
         const ctx = document.getElementById('bar-chart-StackedBarPendingTransactions');
         let chart: Chart;
-        if(transactionsResponse.state=='hasData'){
-            let revenues = [...Array(12)].map(i=>0);
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if (t.transaction_type == REVENUES_VALUE && t.pending) {
-                    const month = (new Date(Number(t.date))).getMonth();
-                    revenues[month] ++;
-                }
-            });
+        if(sumaryResponse.state=='hasData' && sumaryResponse.data){
+            let revenues = sumaryResponse.data.pendingTransactions.map(pt=>pt.revenues);
+            // sumaryResponse.data?.forEach((t: Transaction) => {
+            //     if (t.transaction_type == REVENUES_VALUE && t.pending) {
+            //         const month = (new Date(Number(t.date))).getMonth();
+            //         revenues[month] ++;
+            //     }
+            // });
     
-            let expenses = [...Array(12)].map(i=>0);
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if (t.transaction_type == EXPENSES_VALUE && t.pending) {
-                    const month = (new Date(Number(t.date))).getMonth();
-                    expenses[month] ++;
-                }
-            });
+            let expenses = sumaryResponse.data.pendingTransactions.map(pt=>pt.expenses);
+
+            // sumaryResponse.data?.forEach((t: Transaction) => {
+            //     if (t.transaction_type == EXPENSES_VALUE && t.pending) {
+            //         const month = (new Date(Number(t.date))).getMonth();
+            //         expenses[month] ++;
+            //     }
+            // });
     
             const cfg = {
                 type: 'line',

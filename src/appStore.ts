@@ -4,6 +4,7 @@ import { Transaction } from './generated/prisma';
 import { getLastNYearsYearName } from './utils';
 import axios from 'axios';
 import getTransactionsByYear from './actions/getTransactionsByYear';
+import { Sumary } from '../types/model';
 
 
 export type NotifyState = {
@@ -48,7 +49,7 @@ export const appStore = atom({
     message: '',
     severity: 'info' as 'info' | 'success' | 'warning' | 'error',
   } as NotifyState,
-  transactions: [] as Transaction[]
+  transactions: {} as Sumary
 });
 
 export const notifyStore = atom(
@@ -101,22 +102,22 @@ export const stateFiltersStore = atom(
 
 export const getPeriodStore = atom(get=>get(yearFiltersStore));
 
-export const transactionsStore = atom<Promise<Transaction[]>>(
+export const transactionsStore = atom<Promise<Sumary>>(
   async (get) => {
     const year = get(getPeriodStore);
     const account = get(filtersStore).account;
     const state = get(stateFiltersStore);
     
-    const filterFn = (t:Transaction)=>{
-      let q = true;
-      if(account)q &&= t.account == account;
-      if(state)q &&= t.state == state;
-      return q;
-    }
+    // const filterFn = (t:Sumary)=>{
+    //   let q = true;
+    //   if(account)q &&= t.account == account;
+    //   if(state)q &&= t.state == state;
+    //   return q;
+    // }
     // const {data} = await axios.get(`http://localhost:3000/api/transactions/${year}`);
     // return data.transactions.filter((t:Transaction)=>filterFn(t));
-    const transactions = await getTransactionsByYear(year);
-    return transactions.filter((t:Transaction)=>filterFn(t));
+    const sumary = await getTransactionsByYear(year,{account,state});
+    return sumary//transactions.filter((t:any)=>filterFn(t));
   },
   
 );

@@ -74,15 +74,15 @@ export default function PrimaryAppBar() {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const { data: session } = useSession();
   const [filters, setfilters] = useAtom(filtersStore);
-  const [getTransactionsResponse] = useAtom(getTransactions);
+  const [sumaryResponse] = useAtom(getTransactions);
   const[pendingQty,setpendingQty]=React.useState(0);
 
   React.useEffect(()=>{
-    if(getTransactionsResponse.state=='hasData'&&getTransactionsResponse.data){
-      let qty = getTransactionsResponse.data.filter(t=>t.pending).length;
+    if(sumaryResponse.state=='hasData'&&sumaryResponse.data){
+      let qty = sumaryResponse.data.revenues.pending + sumaryResponse.data.expenses.pending;
       setpendingQty(p=>qty);
     }
-  },[getTransactionsResponse])
+  },[sumaryResponse])
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

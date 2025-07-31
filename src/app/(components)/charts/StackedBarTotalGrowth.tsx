@@ -9,29 +9,29 @@ import { useAtom } from 'jotai';
 import { useEffect } from 'react';
 
 export default function StackedBarTotalGrowth() {
-    const [transactionsResponse] = useAtom(getTransactions);
+    const [sumaryResponse] = useAtom(getTransactions);
     const [isLoading] = useAtom(isLoadingStore);
 
     useEffect(() => {
         const ctx = document.getElementById('bar-chart-StackedBarTotalGrowth');
         let chart: Chart;
 
-        if (transactionsResponse.state == 'hasData') {
-            let revenues = [...Array(12)].map(i => 0);
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if (t.transaction_type == REVENUES_VALUE && !t.pending) {
-                    const month = (new Date(Number(t.date))).getMonth();
-                    revenues[month] += amountFromString(t.amount);
-                }
-            });
+        if (sumaryResponse.state == 'hasData' && sumaryResponse.data) {
+            // let revenues = [...Array(12)].map(i => 0);
+            // sumaryResponse.data?.forEach((t: Transaction) => {
+            //     if (t.transaction_type == REVENUES_VALUE && !t.pending) {
+            //         const month = (new Date(Number(t.date))).getMonth();
+            //         revenues[month] += amountFromString(t.amount);
+            //     }
+            // });
 
-            let expenses = [...Array(12)].map(i => 0);
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if (t.transaction_type == EXPENSES_VALUE && !t.pending) {
-                    const month = (new Date(Number(t.date))).getMonth();
-                    expenses[month] += amountFromString(t.amount);
-                }
-            });
+            // let expenses = [...Array(12)].map(i => 0);
+            // sumaryResponse.data?.forEach((t: Transaction) => {
+            //     if (t.transaction_type == EXPENSES_VALUE && !t.pending) {
+            //         const month = (new Date(Number(t.date))).getMonth();
+            //         expenses[month] += amountFromString(t.amount);
+            //     }
+            // });
 
             const cfg = {
                 type: 'bar',
@@ -53,12 +53,12 @@ export default function StackedBarTotalGrowth() {
                     datasets: [
                         {
                             label: 'Revenues',
-                            data: revenues,
+                            data: sumaryResponse.data.totalGrowth.months.map(tg=>tg.revenues),
                             stack: 'lv1',
                         },
                         {
                             label: 'Expenses',
-                            data: expenses,
+                            data: sumaryResponse.data.totalGrowth.months.map(tg=>tg.expenses),
                             stack: 'lv1',
                         },
                     ],

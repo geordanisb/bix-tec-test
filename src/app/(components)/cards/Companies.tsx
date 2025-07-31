@@ -10,7 +10,7 @@ import { Transaction } from "@/generated/prisma";
 import { useEffect, useState } from "react";
 
 export default function Companies() {
-  const [transactionsResponse] = useAtom(getTransactions);
+  const [sumaryResponse] = useAtom(getTransactions);
   const [,setfilters] = useAtom(filtersStore);
   const[isLoading]=useAtom(isLoadingStore);
   let [companies,setcompanies]=useState<Record<string, {
@@ -29,47 +29,47 @@ export default function Companies() {
     }
 
   useEffect(()=>{
-    if(transactionsResponse.state=='hasData'&&transactionsResponse.data){
-      companies={};
-      transactionsResponse.data.forEach((t:Transaction) => {
-        if (!t.pending) {
-          if (t.account in companies) {
-            const info = companies[t.account].info;
-            if (t.currency in info) {
-              info[t.currency].expensesQty += t.transaction_type == EXPENSES_VALUE ? 1 : 0;
-              info[t.currency].revenuesQty += t.transaction_type == EXPENSES_VALUE ? 0 : 1;
-              info[t.currency].expensesTotal += t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0;
-              info[t.currency].revenuesTotal += t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount);
-            }
-            else {
-              info[t.currency] = {
-                expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
-                revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
-                expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
-                revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
-              }
-            }
-          }
-          else {
-            companies[t.account] = {
-              info: {
-                [t.currency]: {
-                  expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
-                  revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
-                  expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
-                  revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
-                }
-              }
-            }
-          }
-        }
-      });
-      if(!transactionsResponse.data.length)
-        setcompanies(p=>({}))
-      else
+    if(sumaryResponse.state=='hasData'&&sumaryResponse.data){
+      companies=sumaryResponse.data.companies;
+      // sumaryResponse.data.forEach((t:Transaction) => {
+      //   if (!t.pending) {
+      //     if (t.account in companies) {
+      //       const info = companies[t.account].info;
+      //       if (t.currency in info) {
+      //         info[t.currency].expensesQty += t.transaction_type == EXPENSES_VALUE ? 1 : 0;
+      //         info[t.currency].revenuesQty += t.transaction_type == EXPENSES_VALUE ? 0 : 1;
+      //         info[t.currency].expensesTotal += t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0;
+      //         info[t.currency].revenuesTotal += t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount);
+      //       }
+      //       else {
+      //         info[t.currency] = {
+      //           expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
+      //           revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
+      //           expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
+      //           revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
+      //         }
+      //       }
+      //     }
+      //     else {
+      //       companies[t.account] = {
+      //         info: {
+      //           [t.currency]: {
+      //             expensesQty: t.transaction_type == EXPENSES_VALUE ? 1 : 0,
+      //             revenuesQty: t.transaction_type == EXPENSES_VALUE ? 0 : 1,
+      //             expensesTotal: t.transaction_type == EXPENSES_VALUE ? amountFromString(t.amount) : 0,
+      //             revenuesTotal: t.transaction_type == EXPENSES_VALUE ? 0 : amountFromString(t.amount)
+      //           }
+      //         }
+      //       }
+      //     }
+      //   }
+      // });
+      // if(!sumaryResponse.data.length)
+      //   setcompanies(p=>({}))
+      // else
         setcompanies(p=>({...companies}));
     }
-  },[transactionsResponse])
+  },[sumaryResponse])
 
   function onAccountSelected(account:string){
     setfilters({account});
@@ -108,7 +108,7 @@ export default function Companies() {
                       </Stack>
                       <Stack direction={'row'}>
                         <AttachMoney color="success"/>
-                        <Typography color="success">{formatAmountFromNumber(info.revenuesTotal)}</Typography>
+                        <Typography color="success">{formatAmountFromNumber(info.revenuesTotal,currency)}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell>
@@ -118,7 +118,7 @@ export default function Companies() {
                       </Stack>
                       <Stack direction={'row'}>
                         <AttachMoney color="warning"/>
-                        <Typography color="warning">{formatAmountFromNumber(info.expensesTotal)}</Typography>
+                        <Typography color="warning">{formatAmountFromNumber(info.expensesTotal,currency)}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell><Typography color="info">{currency.toUpperCase()}</Typography></TableCell>

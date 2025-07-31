@@ -1,9 +1,15 @@
+import { DEFAULT_CURRENCY } from "./constants"
 
-export const formatAmountFromNumber = (amount:number)=>{
-
-    return new Intl
-                .NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
-                .format(amount)
+export const formatAmountFromNumber = (amount:number,currency?:string)=>{
+    const c = currency ?? DEFAULT_CURRENCY;
+    switch(c){
+        case 'brl':
+            return `BR$ ${amount.toFixed(2)}`
+    }
+    //TODO bug : https://github.com/testing-library/jest-dom/issues/376
+    // return new Intl
+    //             .NumberFormat("pt-BR", { style: "currency", currency: "BRL" })
+    //             .format(amount)
 }
 
 export const amountFromString = (amount:string)=>{

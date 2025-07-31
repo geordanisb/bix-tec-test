@@ -9,26 +9,14 @@ import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 
 export default function Revenues() {
-    const [transactionsResponse] = useAtom(getTransactions);
+    const [sumaryResponse] = useAtom(getTransactions);
     const[isLoading]=useAtom(isLoadingStore);
-
     let [data,setdata] = useState({totalAmount:0,revenuesQty:0});
     useEffect(()=>{
-        if(transactionsResponse.state=='hasData'&&transactionsResponse.data){
-            data={totalAmount:0,revenuesQty:0}
-            transactionsResponse.data?.forEach((t: Transaction) => {
-                if(t.transaction_type==REVENUES_VALUE && !t.pending){
-                    data.totalAmount += amountFromString(t.amount);
-                    data.revenuesQty++;
-                }
-            });
-            if(!transactionsResponse.data.length){
-                data.totalAmount=0;
-                data.revenuesQty=0;
-            }
-            setdata(p=>({...data}));
+        if(sumaryResponse.state=='hasData'&&sumaryResponse.data){
+            setdata(p=>({totalAmount:sumaryResponse.data.revenues.amount,revenuesQty:sumaryResponse.data.revenues.qty}))
         }
-    },[transactionsResponse])
+    },[sumaryResponse])
 
     return <Card data-testid="revenues-card" sx={{
         width: '350px',
