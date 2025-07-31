@@ -1,25 +1,36 @@
 'use client'
-import { getTransactions } from "@/appStore";
+import { getTransactions, isLoadingStore } from "@/appStore";
 import { REVENUES_VALUE } from "@/constants";
 import { Transaction } from "@/generated/prisma";
 import { amountFromString, formatAmountFromNumber } from "@/utils";
 import { CallReceived } from "@mui/icons-material";
-import { Avatar, Card, CardContent, CardHeader, Chip, Stack, Typography } from "@mui/material";
+import { Avatar, Card, CardContent, CardHeader, Chip, CircularProgress, Stack, Typography } from "@mui/material";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 
 export default function Revenues() {
-    const [transactions] = useAtom(getTransactions);
+    const [transactionsResponse] = useAtom(getTransactions);
+    const[isLoading]=useAtom(isLoadingStore);
 
-    let totalAmount = 0;
-    let revenuesQty = 0;
-    transactions?.forEach((t: Transaction) => {
-        if(t.transaction_type==REVENUES_VALUE && !t.pending){
-            totalAmount += amountFromString(t.amount);
-            revenuesQty++;
+    let [data,setdata] = useState({totalAmount:0,revenuesQty:0});
+    useEffect(()=>{
+        if(transactionsResponse.state=='hasData'&&transactionsResponse.data){
+            data={totalAmount:0,revenuesQty:0}
+            transactionsResponse.data?.forEach((t: Transaction) => {
+                if(t.transaction_type==REVENUES_VALUE && !t.pending){
+                    data.totalAmount += amountFromString(t.amount);
+                    data.revenuesQty++;
+                }
+            });
+            if(!transactionsResponse.data.length){
+                data.totalAmount=0;
+                data.revenuesQty=0;
+            }
+            setdata(p=>({...data}));
         }
-    });
+    },[transactionsResponse])
 
-    return <Card sx={{
+    return <Card data-testid="revenues-card" sx={{
         width: '350px',
         height: '185px',
         backgroundImage: `url('/cards/revenues.svg')`
@@ -34,13 +45,22 @@ export default function Revenues() {
         // action={
         //   <PeriodFilter sx={{color:'white'}} />
         // }
-        title={<Typography variant="h5">Revenues <Chip sx={{color:'white'}} label={`${revenuesQty}`}/></Typography>}
+        title={<Typography variant="h5">Revenues
+        {
+            <Chip sx={{color:'white'}} label={
+                `${isLoading ? '...' : data.revenuesQty}`
+            }/>
+
+        } 
+        </Typography>}
 
         // subheader={}
       />
 
         <CardContent component={Stack} direction={'row'} justifyContent={'space-between'}>
-        <Typography sx={{}} color='white' variant="h4">{formatAmountFromNumber(totalAmount)}</Typography>
+        <Typography data-testid="revenues-card-amount" color='white' variant="h4">{
+           isLoading ? <CircularProgress/> : formatAmountFromNumber(data.totalAmount)
+        }</Typography>
         <Avatar><CallReceived color="success"/></Avatar>
         </CardContent>
         {/* <Box sx={{backgroundImage:'/cards/revenues.svg'}}>

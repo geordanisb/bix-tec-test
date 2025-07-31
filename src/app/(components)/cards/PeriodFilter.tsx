@@ -1,48 +1,31 @@
 'use client'
-import getTransactionsLastTwoYears from "@/actions/getTransactionsTwoYearsBefore";
-import getTransactionsOneYearBefore from "@/actions/getTransactionsOneYearBefore";
-import getTransactionsThisYear from "@/actions/getTransactionsThisYear";
-import {  FiltersStatePeriodHash, periodFiltersStore, transactionsStore } from "@/appStore";
+import {  yearFiltersStore } from "@/appStore";
 import { BaseSelectProps, FormControl, MenuItem, Select } from "@mui/material";
 import { useAtom } from "jotai";
-import { useEffect } from "react";
 
-interface Props extends BaseSelectProps {} 
-export default function PeriodFilter({...others}:Props) {
-    const [period, setperiod] = useAtom(periodFiltersStore);
-    const [,setTransactions]=useAtom(transactionsStore);
-
-    useEffect(()=>{
-        const fn = async ()=>{
-            let t;
-            switch(period){
-                case 'twoYearsBefore':
-                    t=await getTransactionsLastTwoYears();
-                    break;
-                case 'oneYearBefore':
-                    t=await getTransactionsOneYearBefore();
-                    break;
-                case 'thisYear':
-                    t=await getTransactionsThisYear();
-            }
-            setTransactions(t);
-        }
-        fn();
-    },[period])
-    const handleChange = (e:any) => {
-        setperiod(e.target.value);
-    }
+interface Props extends BaseSelectProps { }
+export default function PeriodFilter({ ...others }: Props) {
+    const [year, setyear] = useAtom(yearFiltersStore);
     
+    const years = [...Array(5)].map((_, idx) => {
+        const currentYear = (new Date()).getFullYear();
+        return currentYear - idx
+    })
+
+    const handleChange = (e: any) => {
+        setyear(e.target.value);
+    }
+
     return <FormControl>
         <Select
             labelId="filter-period"
             id="demo-simple-select"
-            value={period}
+            value={year}
             onChange={handleChange}
             {...others}
         >
             {
-                Object.entries(FiltersStatePeriodHash).map(([k,v]) => <MenuItem key={k} value={k}>{v.toString()}</MenuItem>)
+                years.map(year => <MenuItem key={year} value={year}>{year}</MenuItem>)
             }
         </Select>
     </FormControl>

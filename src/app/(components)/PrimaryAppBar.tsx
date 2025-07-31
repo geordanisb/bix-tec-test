@@ -14,13 +14,15 @@ import SearchIcon from '@mui/icons-material/Search';
 import MailIcon from '@mui/icons-material/Mail';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MoreIcon from '@mui/icons-material/MoreVert';
-import { Avatar, Button,  Drawer,  List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material';
-import {  ManageAccountsOutlined, MonetizationOn, RestartAlt } from '@mui/icons-material';
+import { Avatar, Button, CircularProgress, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack } from '@mui/material';
+import { ManageAccountsOutlined, MonetizationOn, RestartAlt } from '@mui/icons-material';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import PeriodFilter from './cards/PeriodFilter';
 import { useAtom } from 'jotai';
 import { FiltersInitialState, filtersStore, getTransactions } from '@/appStore';
+import { Transaction } from '@/generated/prisma';
+import StateFilter from './cards/StateFilter';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -71,9 +73,16 @@ export default function PrimaryAppBar() {
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
   const { data: session } = useSession();
-  const [filters,setfilters]=useAtom(filtersStore);
-  const [transactions]=useAtom(getTransactions);
-  const pendingQty = transactions.filter(t=>t.pending).length;
+  const [filters, setfilters] = useAtom(filtersStore);
+  const [getTransactionsResponse] = useAtom(getTransactions);
+  const[pendingQty,setpendingQty]=React.useState(0);
+
+  React.useEffect(()=>{
+    if(getTransactionsResponse.state=='hasData'&&getTransactionsResponse.data){
+      let qty = getTransactionsResponse.data.filter(t=>t.pending).length;
+      setpendingQty(p=>qty);
+    }
+  },[getTransactionsResponse])
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -109,19 +118,20 @@ export default function PrimaryAppBar() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={() => { signOut(); handleMenuClose() }}>Sign out</MenuItem>
-      <MenuItem onClick={()=>{
-        localStorage.setItem('filters',JSON.stringify(filters))
+      <MenuItem onClick={() => {
+        localStorage.setItem('filters', JSON.stringify(filters))
       }}>Save filters preferences</MenuItem>
-      <MenuItem onClick={()=>{
-        localStorage.setItem('filters','');
+      <MenuItem onClick={() => {
+        localStorage.setItem('filters', '');
       }}>Remove filters preferences</MenuItem>
+      <MenuItem onClick={() => { signOut(); handleMenuClose() }}>Sign out</MenuItem>
+
     </Menu>
   );
 
-  const resetFilters = ()=>{debugger;
+  const resetFilters = () => {
     const inLocalStorage = localStorage.getItem('filters');
-    const filters = inLocalStorage  ? JSON.parse(inLocalStorage) : FiltersInitialState;
+    const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
     setfilters(filters);
   }
 
@@ -145,7 +155,7 @@ export default function PrimaryAppBar() {
       <MenuItem>
         <IconButton onClick={resetFilters} size="large" aria-label="show 4 new mails" color="inherit">
           {/* <Badge badgeContent={4} color="error"> */}
-            <RestartAlt />
+          <RestartAlt />
           {/* </Badge> */}
         </IconButton>
         <p>Messages</p>
@@ -156,7 +166,9 @@ export default function PrimaryAppBar() {
           aria-label="show pending transactions qty"
           color="inherit"
         >
-          <Badge badgeContent={pendingQty} color="error">
+          <Badge badgeContent={
+            pendingQty
+          } color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -219,11 +231,12 @@ export default function PrimaryAppBar() {
 
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <PeriodFilter sx={{color:'white',fontWeight:'bold'}}/>
-            
+            <StateFilter sx={{ color: 'white', fontWeight: 'bold' }} />
+            <PeriodFilter sx={{ color: 'white', fontWeight: 'bold' }} />
+
             <IconButton onClick={resetFilters} size="large" aria-label="show 4 new mails" color="inherit">
               {/* <Badge badgeContent={4} color="error"> */}
-                <RestartAlt />
+              <RestartAlt />
               {/* </Badge> */}
             </IconButton>
             <IconButton
@@ -231,7 +244,9 @@ export default function PrimaryAppBar() {
               aria-label="show pending transactions qty"
               color="inherit"
             >
-              <Badge badgeContent={pendingQty} color="error">
+              <Badge badgeContent={
+                pendingQty
+              } color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>

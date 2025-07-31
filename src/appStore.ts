@@ -1,6 +1,9 @@
 import { atom } from 'jotai';
+import { loadable } from "jotai/utils";
 import { Transaction } from './generated/prisma';
 import { getLastNYearsYearName } from './utils';
+import axios from 'axios';
+
 
 export type NotifyState = {
   open: boolean;
@@ -24,16 +27,17 @@ export type FiltersState = {
   state: string;
   transaction_type: string;
   currency: string;
-  period: FiltersStatePeriod
+  year: number
 }
-export const FiltersInitialState = {
+const filtersInitialState = {
     account: '',
     industry: '',
     state: '',
     transaction_type: '',
     currency: 'brl',
-    period: 'thisYear'
+    year: (new Date()).getFullYear()
   }
+export const FiltersInitialState = filtersInitialState
 
 export const appStore = atom({
   isLoading: false as boolean,
@@ -66,33 +70,60 @@ export const isLoadingStore = atom(
   }
 );
 
-export const periodFiltersStore = atom(
-  (get) => get(appStore).filters.period,
-  (get, set, newState: FiltersStatePeriod) => {
+export const yearFiltersStore = atom(
+  (get) => get(appStore).filters.year,
+  (get, set, year: number) => {
     set(appStore, (p) => ({
       ...p,
       filters:{
         ...p.filters,
-        period:newState
+        year
       }
     }));
   }
 );
 
-export const transactionsStore = atom(
-  (get) => get(appStore).transactions,
-  (get, set, transactions: Transaction[]) => {
+export const stateFiltersStore = atom(
+  (get) => get(appStore).filters.state,
+  (get, set, state: string) => {
     set(appStore, (p) => ({
       ...p,
-      transactions
+      filters:{
+        ...p.filters,
+        state
+      }
     }));
   }
 );
 
+
+
+export const getPeriodStore = atom(get=>get(yearFiltersStore));
+
+export const transactionsStore = atom<Promise<Transaction[]>>(
+  async (get) => {
+    const year = get(getPeriodStore);
+    const account = get(filtersStore).account;
+    const state = get(stateFiltersStore);
+    const {data} = await axios.get(`http://localhost:3000/api/transactions/${year}`);
+    
+    const filterFn = (t:Transaction)=>{
+      let q = true;
+      if(account)q &&= t.account == account;
+      if(state)q &&= t.state == state;
+      return q;
+    }
+
+    return data.transactions.filter((t:Transaction)=>filterFn(t));
+  },
+  
+);
+export const getTransactions = loadable(transactionsStore);
+
+
 export const filtersStore = atom(
   (get) => get(appStore).filters,
   (get, set, filters: Partial<FiltersState>) => {
-    debugger;
     // let ts = get(transactionsStore);
     // ts = ts.filter(t=>{
     //   if(filters.account){
@@ -108,12 +139,12 @@ export const filtersStore = atom(
   }
 );
 
-export const getTransactions = atom(get=>{
-  const filters = get(filtersStore);
-  let ts = get(transactionsStore);
-  if(filters.account){
-    ts = ts.filter(t=>t.account==filters.account);
-  }
-  return ts;
-})
+// export const getTransactions = atom(async get=>{
+//   const filters = get(filtersStore);
+//   let ts = await get(transactionsStore);
+//   if(filters.account){
+//     ts = ts.filter((t:any)=>t.account==filters.account);
+//   }
+//   return ts;
+// })
 
