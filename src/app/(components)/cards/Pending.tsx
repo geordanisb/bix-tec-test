@@ -31,7 +31,7 @@ export default function Pending() {
     return <Card sx={{
         width: '100%',
         height: '185px',
-        backgroundImage: `url('/cards/revenues.svg')`
+        backgroundImage: `url('/cards/pending.svg')`
     }}>
         <CardHeader
             sx={{ color: 'white' }}

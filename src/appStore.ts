@@ -3,6 +3,7 @@ import { loadable } from "jotai/utils";
 import { Transaction } from './generated/prisma';
 import { getLastNYearsYearName } from './utils';
 import axios from 'axios';
+import getTransactionsByYear from './actions/getTransactionsByYear';
 
 
 export type NotifyState = {
@@ -105,7 +106,6 @@ export const transactionsStore = atom<Promise<Transaction[]>>(
     const year = get(getPeriodStore);
     const account = get(filtersStore).account;
     const state = get(stateFiltersStore);
-    const {data} = await axios.get(`http://localhost:3000/api/transactions/${year}`);
     
     const filterFn = (t:Transaction)=>{
       let q = true;
@@ -113,8 +113,10 @@ export const transactionsStore = atom<Promise<Transaction[]>>(
       if(state)q &&= t.state == state;
       return q;
     }
-
-    return data.transactions.filter((t:Transaction)=>filterFn(t));
+    // const {data} = await axios.get(`http://localhost:3000/api/transactions/${year}`);
+    // return data.transactions.filter((t:Transaction)=>filterFn(t));
+    const transactions = await getTransactionsByYear(year);
+    return transactions.filter((t:Transaction)=>filterFn(t));
   },
   
 );
