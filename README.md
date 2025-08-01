@@ -24,7 +24,7 @@
     4. undo the changes made in 5.1
 6. create an admin user 
     1. edit the file src/middleware.ts: uncomment line 16, comment lines 17-18 , uncomment 21-23, got to: http://localhost:3000/user/create
-    2. check up the Is Admin? checkobox 
+    2. check the Is Admin? checkobox 
     3. undo the changes made in 6.1
     4. go to: http://localhost:3000, You may need to delete the .next folder (to clean nextjs cache) and restart the server.
 7. to run the tests (the first render de home page client side component and checks that Revenues cards was rendered, the second checks whether the amount in the Revenues cards is correct)
