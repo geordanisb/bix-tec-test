@@ -22,6 +22,15 @@ export async function GET(
   const gte = (new Date(`${year}-01-01`)).getTime();
   const lte = (new Date(`${year}-12-31`)).getTime();
   const transactions = await prisma.transaction.findMany({
+    select:{
+      state:true,
+      account:true,
+      amount:true,
+      date:true,
+      pending:true,
+      transaction_type:true,
+      currency:true
+    },
     where: {
       date: {
         gte,
