@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 
 export default function Companies() {
   const [sumaryResponse] = useAtom(getTransactions);
-  const [,setfilters] = useAtom(filtersStore);
+  const [filters,setfilters] = useAtom(filtersStore);
   const[isLoading]=useAtom(isLoadingStore);
   let [companies,setcompanies]=useState<Record<string, {
     info: Record<string, {//a key for every currency
@@ -23,9 +23,9 @@ export default function Companies() {
   }>>({});
 
   const resetFilters = () => {
-      const inLocalStorage = localStorage.getItem('filters');
-      const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
-      setfilters(filters);
+      // const inLocalStorage = localStorage.getItem('filters');
+      // const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
+      setfilters({...filters,account:''});
     }
 
   useEffect(()=>{

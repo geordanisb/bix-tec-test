@@ -23,9 +23,9 @@ export default function States() {
   }>>({});
 
   const resetFilters = () => {
-    const inLocalStorage = localStorage.getItem('filters');
-    const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
-    setfilters(filters);
+    // const inLocalStorage = localStorage.getItem('filters');
+    // const filters = inLocalStorage ? JSON.parse(inLocalStorage) : FiltersInitialState;
+    setfilters({state:''});
   }
 
   useEffect(() => {
