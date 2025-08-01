@@ -236,7 +236,7 @@ global.fetch = jest.fn(async () => {
 );
 
 
-describe('Home Page', () => {
+describe("Home Page's client side component", () => {
 
   it('Revenues card rendered on home page', async () => {
     render(<Page />);
@@ -246,7 +246,7 @@ describe('Home Page', () => {
     })
   });
 
-  it('Revenues card content', async () => {
+  it('Check the Revenues card amount', async () => {
     render(<RevenuesProvider />);
 
     await waitFor(async () => {
